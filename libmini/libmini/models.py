@@ -1,32 +1,4 @@
-# Simple Factory Pattern in the style of a notifier system
-
-# Define the Notifier Interface
-from abc import ABC, abstractmethod
-
-class Notifier(ABC):
-    @abstractmethod
-    def send(self, to: str, message: str) -> str:
-        pass
-
-# Concrete Notifiers
-class EmailNotifier(Notifier):
-    def send(self, to: str, message: str) -> str:
-        return f"Email sent to {to}: {message}"
-
-class SMSNotifier(Notifier):
-    def send(self, to: str, message: str) -> str:
-        return f"SMS sent to {to}: {message}"
-
-# Notifier Factory
-class NotifierFactory:
-    @staticmethod
-    def create(kind: str) -> Notifier:
-        if kind == "email":
-            return EmailNotifier()
-        elif kind == "sms":
-            return SMSNotifier()
-        else:
-            raise ValueError("Unsupported notifier type")
+from libmini.notify import Notifier
 
 # 1. Base class
 class Person:
@@ -114,25 +86,6 @@ class PersonFactory:
 
 
 
-
-# Notifier System
-# Create notifier via factory
-notifier = NotifierFactory.create("email")
-
-# Create library with notifier
-library = Library(notifier)
-
-# Create people
-librarian = PersonFactory.create_person("librarian", "Ada", "ada@library.com")
-member = PersonFactory.create_person("member", "Tunde", "tunde@email.com")
-
-# Add books and register member
-librarian.add_book(library, Book("Things Fall Apart", "Chinua Achebe", "ISBN001"))
-librarian.register_member(library, member)
-
-# Borrow and return with notifications
-member.borrow_book(library, "ISBN001")
-member.return_book(library, "ISBN001")
 
 
 
