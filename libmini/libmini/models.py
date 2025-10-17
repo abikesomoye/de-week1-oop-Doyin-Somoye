@@ -1,3 +1,5 @@
+from libmini.notify import Notifier
+
 # 1. Base class
 class Person:
     def __init__(self, name, email):
@@ -36,9 +38,10 @@ class Book:
 
 # 4. Library class
 class Library:
-    def __init__(self):
-        self._catalog = {}  # isbn -> Book
-        self._loans = {}    # email -> set of isbn
+    def __init__(self, notifier: Notifier):
+        self._catalog = {}
+        self._loans = {}
+        self._notifier = notifier
 
     def add_book(self, book):
         self._catalog[book.isbn] = book
@@ -52,6 +55,8 @@ class Library:
         if book and book.available:
             book.available = False
             self._loans[member.email].add(isbn)
+            message = f"{member.name} borrowed '{book.title}'"
+            print(self._notifier.send(member.email, message))
         else:
             print(f"Book {isbn} is not available.")
 
@@ -59,11 +64,14 @@ class Library:
         if isbn in self._loans.get(member.email, set()):
             self._catalog[isbn].available = True
             self._loans[member.email].remove(isbn)
+            message = f"{member.name} returned '{self._catalog[isbn].title}'"
+            print(self._notifier.send(member.email, message))
         else:
             print(f"{member.name} did not borrow book {isbn}.")
 
     def member_loans(self, member):
         return [self._catalog[isbn] for isbn in self._loans.get(member.email, set())]
+    
 
 # 5. Simple Factory
 class PersonFactory:
@@ -78,31 +86,6 @@ class PersonFactory:
 
 
 
-# Step 1: Setup the Library and Factory
-library = Library()
-
-# Create a librarian and a member using the factory
-librarian = PersonFactory.create_person("librarian", "Ada", "ada@library.com")
-member = PersonFactory.create_person("member", "Tunde", "tunde@email.com")
-
-# Step 2: Librarian Adds Books
-book1 = Book("Things Fall Apart", "Chinua Achebe", "ISBN001")
-book2 = Book("Half of a Yellow Sun", "Chimamanda Ngozi Adichie", "ISBN002")
-
-librarian.add_book(library, book1)
-librarian.add_book(library, book2)
-
-# Step 3: Librarian registers Member
-librarian.register_member(library, member)
-
-# Step 4: Member Borrows a Book
-member.borrow_book(library, "ISBN001")
-print("Tunde's Loans:", library.member_loans(member))
-
-
-# Step 5: Member Returns the Book
-member.return_book(library, "ISBN001")
-print("Tunde's Loans After Return:", library.member_loans(member))
 
 
 
